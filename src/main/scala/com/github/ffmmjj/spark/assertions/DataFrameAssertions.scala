@@ -8,7 +8,7 @@ object DataFrameAssertions {
 }
 
 case class DataFrameWithCustomAssertions(actual: DataFrame) {
-  def shouldHaveSameContentsAs(expected: DataFrame): Unit = {
+  def shouldHaveSameContentsAs(expected: DataFrame, ignoringColumnsOrder: Boolean = false): Unit = {
     val expectedDfColumns = expected.columns
     val actualDfColumns = actual.columns
     val missingColumnsInActualDf = expectedDfColumns.toSet.diff(actualDfColumns.toSet).toSeq
@@ -16,7 +16,7 @@ case class DataFrameWithCustomAssertions(actual: DataFrame) {
 
     assert(missingColumnsInActualDf.isEmpty, buildMissingColumnsMessage(missingColumnsInActualDf))
     assert(extraColumnInActualDf.isEmpty, buildExtraColumnsMessage(extraColumnInActualDf))
-    assert(actualDfColumns sameElements expectedDfColumns, buildColumnsInDifferentOrderMessage(expected))
+    assert(ignoringColumnsOrder || (actualDfColumns sameElements expectedDfColumns), buildColumnsInDifferentOrderMessage(expected))
   }
 
   private def buildMissingColumnsMessage(missingColumnsInActualDf: Seq[String]) = {

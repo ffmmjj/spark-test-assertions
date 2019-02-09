@@ -40,4 +40,13 @@ class DataFrameAssertionsTest extends FlatSpec with SparkSessionTestWrapper with
     val expectedErrorMessage = s"${actual.toString} has the same columns as ${expected.toString}, but in a different order - do you really care about column order in this test?"
     assertionResult.failed.get.getMessage should include (expectedErrorMessage)
   }
+
+  it should "not raise an exception if the columns in the actual and expected dataframes follow a different order but the ignoringColumnsOrder is set to false" in {
+    val actual = Seq(("value1", "value2")).toDF("field1", "field2")
+    val expected = Seq(("value2", "value1")).toDF("field2", "field1")
+
+    val assertionResult = Try(actual shouldHaveSameContentsAs(expected, ignoringColumnsOrder=true))
+
+    assertionResult.isSuccess should be (true)
+  }
 }

@@ -49,4 +49,22 @@ class DataFrameAssertionsTest extends FlatSpec with SparkSessionTestWrapper with
 
     assertionResult.isSuccess should be (true)
   }
+
+  it should "raise an exception if the columns are the same but the values differ in some of the dataframe lines" in {
+    val actual = Seq(
+      ("value1", "value2", "value3"),
+      ("value4", "value5", "value6")
+    ).toDF("field1", "field2", "field3")
+    val expected = Seq(
+      ("value1", "value7", "value8"),
+      ("value9", "value5", "value6")
+    ).toDF("field1", "field2", "field3")
+
+    val assertionResult = Try(actual shouldHaveSameContentsAs expected)
+
+    val failureMessage = assertionResult.failed.get.getMessage
+    failureMessage should include ("Different values found:")
+    failureMessage should include ("Line 0: {field2: (expected value7, found value2), field3: (expected value8, found value3)}")
+    failureMessage should include ("Line 1: {field1: (expected value9, found value4)}")
+  }
 }

@@ -63,7 +63,7 @@ class DataFrameAssertionsTest extends FlatSpec with SparkSessionTestWrapper with
     val assertionResult = Try(actual shouldHaveSameContentsAs expected)
 
     val failureMessage = assertionResult.failed.get.getMessage
-    failureMessage should include ("Different values found:")
+    failureMessage should include ("Different values found.")
     failureMessage should include ("Line 0: {field2: (expected value7, found value2), field3: (expected value8, found value3)}")
     failureMessage should include ("Line 1: {field1: (expected value9, found value4)}")
   }

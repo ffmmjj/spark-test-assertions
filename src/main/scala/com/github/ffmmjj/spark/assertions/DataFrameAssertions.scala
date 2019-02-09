@@ -37,7 +37,7 @@ case class DataFrameWithCustomAssertions(actual: DataFrame) {
         s"Line $lineNo: {${String.join(", ", unmatchedValues.map(item => s"${item._1}: ${item._2}").toSeq:_*)}}"
       }
 
-    "Different values found:\n" + String.join("\n", unmatchedValuesDescriptions:_*)
+    "Different values found.\n" + String.join("\n", unmatchedValuesDescriptions:_*)
   }
 
   private def unmatchingValues(actualRow: Row, expectedRow: Row): Map[String, String] = {

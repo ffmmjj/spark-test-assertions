@@ -12,7 +12,9 @@ case class DataFrameWithCustomAssertions(actual: DataFrame) {
     val expectedDfColumns = expected.columns.toSet
     val actualDfColumns = actual.columns.toSet
     val missingColumnsInActualDf = expectedDfColumns.diff(actualDfColumns).toSeq
+    val extraColumnInActualDf = actualDfColumns.diff(expectedDfColumns).toSeq
 
     assert(missingColumnsInActualDf.isEmpty, s"Dataframe ${actual.toString} doesn't have column(s) [${String.join(", ", missingColumnsInActualDf:_*)}]")
+    assert(extraColumnInActualDf.isEmpty, s"Dataframe ${actual.toString} contains extra columns [${String.join(", ", extraColumnInActualDf:_*)}]")
   }
 }

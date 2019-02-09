@@ -20,4 +20,14 @@ class DataFrameAssertionsTest extends FlatSpec with SparkSessionTestWrapper with
     val expectedErrorMessage = s"${actual.toString()} doesn't have column(s) [field2, field3]"
     assertionResult.failed.get.getMessage should include (expectedErrorMessage)
   }
+
+  it should "raise an exception detailing the extra fields if the actual dataframe has columns that dont't exist in the expected dataframe" in {
+    val actual = Seq(("value1", "value2", "value3")).toDF("field1", "field2", "field3")
+    val expected = Seq("value4").toDF("field1")
+
+    val assertionResult = Try(actual shouldHaveSameContentsAs expected)
+
+    val expectedErrorMessage = s"${actual.toString()} contains extra columns [field2, field3]"
+    assertionResult.failed.get.getMessage should include (expectedErrorMessage)
+  }
 }

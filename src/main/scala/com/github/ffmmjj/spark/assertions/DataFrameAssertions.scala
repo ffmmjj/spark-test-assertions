@@ -1,6 +1,6 @@
 package com.github.ffmmjj.spark.assertions
 
-import org.apache.spark.sql.types.{DoubleType, FloatType, IntegerType, StringType}
+import org.apache.spark.sql.types._
 import org.apache.spark.sql.{DataFrame, Row}
 
 
@@ -20,8 +20,17 @@ case class DataFrameWithCustomAssertions(actual: DataFrame) {
     assert(extraColumnInActualDf.isEmpty, buildExtraColumnsMessage(extraColumnInActualDf))
     assert(ignoringColumnsOrder || (actualDfColumns sameElements expectedDfColumns), buildColumnsInDifferentOrderMessage(expected))
 
+    val columnsWithDifferentTypes = getColumnsWithDifferentTypes(expected)
+    assert(columnsWithDifferentTypes.isEmpty, buildColumnsWithDifferentTypesMessage(columnsWithDifferentTypes))
+
     val linesWithUnmatchedValues = getLinesWithUnmatchedValues(expected)
     assert(linesWithUnmatchedValues.isEmpty, buildUnmatchedValuesMessage(linesWithUnmatchedValues))
+  }
+
+  private def getColumnsWithDifferentTypes(expected: DataFrame) = {
+    actual.schema.map(schemaField => (schemaField.name, schemaField.dataType)).sortBy(_._1)
+      .zip(expected.schema.map(schemaField => (schemaField.name, schemaField.dataType)).sortBy(_._1))
+      .filter { case (actualItem, expectedItem) => actualItem._2 != expectedItem._2 }
   }
 
   private def getLinesWithUnmatchedValues(expected: DataFrame) = {
@@ -29,6 +38,18 @@ case class DataFrameWithCustomAssertions(actual: DataFrame) {
       .zipWithIndex
       .map { case (rows, lineNo) => (unmatchingValues(rows._1, rows._2), lineNo) }
       .filter { case (mismatchesMap, _) => mismatchesMap.nonEmpty }
+  }
+
+  private def buildColumnsWithDifferentTypesMessage(columnsWithDifferentTypes: Seq[((String, DataType), (String, DataType))]): String = {
+    val unmatchedColumnsFromActualDf = columnsWithDifferentTypes.map(_._1)
+    val unmatchedColumnsFromExpectedDf = columnsWithDifferentTypes.map(_._2)
+
+    val expectedTypesMessage = unmatchedColumnsFromExpectedDf.map { case (columnName, columnType) => s"($columnName, ${columnType.getClass.getSimpleName})"}
+    val actualTypesMessage = unmatchedColumnsFromActualDf.map { case (columnName, columnType) => s"($columnName, ${columnType.getClass.getSimpleName})"}
+
+    "Columns have different types.\n" +
+      s"Expected: ${String.join(", ", expectedTypesMessage:_*)}\n"+
+      s"Actual: ${String.join(", ", actualTypesMessage:_*)}"
   }
 
   private def buildUnmatchedValuesMessage(linesWithUnmatchedValues: Array[(Map[String, String], Int)]): String = {
@@ -45,9 +66,10 @@ case class DataFrameWithCustomAssertions(actual: DataFrame) {
       .filter(schemaField => {
         schemaField.dataType match {
           case StringType => actualRow.getAs[String](schemaField.name) != expectedRow.getAs[String](schemaField.name)
-          case IntegerType => actualRow.getAs[Int](schemaField.name) != expectedRow.getAs[Int](schemaField.name)
           case DoubleType => Math.abs(actualRow.getAs[Double](schemaField.name) - expectedRow.getAs[Double](schemaField.name)) > 0.001
           case FloatType => Math.abs(actualRow.getAs[Float](schemaField.name) - expectedRow.getAs[Float](schemaField.name)) > 0.001
+          case IntegerType => actualRow.getAs[Int](schemaField.name) != expectedRow.getAs[Int](schemaField.name)
+          case LongType => actualRow.getAs[Long](schemaField.name) != expectedRow.getAs[Long](schemaField.name)
         }
       })
       .map(schemaField => {

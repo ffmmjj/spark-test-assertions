@@ -1,8 +1,8 @@
 package com.github.ffmmjj.spark.assertions
 
+import com.github.ffmmjj.spark.assertions.DataFrameAssertions._
 import com.github.ffmmjj.spark.helpers.SparkSessionTestWrapper
 import org.scalatest.{FlatSpec, Matchers}
-import com.github.ffmmjj.spark.assertions.DataFrameAssertions._
 
 import scala.util.Try
 
@@ -29,6 +29,18 @@ class DataFrameAssertionsTest extends FlatSpec with SparkSessionTestWrapper with
 
     val expectedErrorMessage = s"${actual.toString()} contains extra columns [field2, field3]"
     assertionResult.failed.get.getMessage should include (expectedErrorMessage)
+  }
+
+  it should "raise an exception if the columns in the actual and expected dataframe have the same names but different types" in {
+    val actual = Seq(("value1", 2.0.toLong)).toDF("field1", "field2")
+    val expected = Seq((1, 2.0)).toDF("field1", "field2")
+
+    val assertionResult = Try(actual shouldHaveSameContentsAs expected)
+
+    val failureMessage = assertionResult.failed.get.getMessage
+    failureMessage should include ("Columns have different types.")
+    failureMessage should include ("Expected: (field1, IntegerType$), (field2, DoubleType$)")
+    failureMessage should include ("Actual: (field1, StringType$), (field2, LongType$)")
   }
 
   it should "raise an exception if the columns in the actual and expected dataframes follow a different order" in {

@@ -8,6 +8,11 @@ and then, in your test,
 
 `actualDataframe shouldHaveSameContentsAs expectedDataframe`
 
+## Goals
+1. Minimal set of dependencies (only Spark itself as a provided dependency);
+2. Readable error messages (clearly pointing differences instead of just dumping the expected and actual DataFrames to the output);
+3. Flexible and readable assertion constraints (allowing, for example, to ignore column order in the compared DataFrames);
+
 ## Examples
 ```scala
 it should "raise an exception detailing the missing fields if the expected dataframe has columns that don't exist in the actual dataframe" in {
@@ -73,8 +78,3 @@ assertion failed: Different values found.
 Line 0: {field2: (expected value7, found value2), field3: (expected value8, found value3)}
 Line 1: {field1: (expected value9, found value4)}
 ```
-
-## Goals
-1. Minimal set of dependencies (only Spark itself as a provided dependency);
-2. Readable error messages (clearly pointing differences instead of just dumping the expected and actual DataFrames to the output);
-3. Flexible and readable assertion constraints (allowing, for example, to ignore column order in the compared DataFrames);

@@ -1,6 +1,13 @@
 # spark-test-assertions
 A single assertion to compare DataFrames.
 
+## Basic usage
+`import com.github.ffmmjj.spark.assertions.DataFrameAssertions._`
+
+and then, in your test,
+
+`actualDataframe shouldHaveSameContentsAs expectedDataframe`
+
 ## Examples
 ```scala
 it should "raise an exception detailing the missing fields if the expected dataframe has columns that don't exist in the actual dataframe" in {

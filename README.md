@@ -1,5 +1,5 @@
 # spark-test-assertions
-A single assertion to compare DataFrames.
+A single assertion to compare Spark DataFrames.
 
 ## Basic usage
 `import com.github.ffmmjj.spark.assertions.DataFrameAssertions._`

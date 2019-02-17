@@ -21,14 +21,13 @@ developers := List(Developer("ffmmjj",
                              url("https://github.com/ffmmjj")))
 licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0"))
 publishMavenStyle := true
-publishTo := sonatypePublishTo.value
 
 // Add sonatype repository settings
-publishTo := Some(
-  if (isSnapshot.value)
-    Opts.resolver.sonatypeSnapshots
-  else
-    Opts.resolver.sonatypeStaging
-)
+publishTo := {
+  val nexus = "https://oss.sonatype.org/"
+  if (isSnapshot.value) Some("snapshots" at nexus + "content/repositories/snapshots")
+  else Some("releases" at nexus + "service/local/staging/deploy/maven2")
+}
+
 useGpg := true
 updateOptions := updateOptions.value.withGigahorse(false)

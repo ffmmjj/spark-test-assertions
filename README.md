@@ -2,6 +2,10 @@
 A single assertion to compare Spark DataFrames.
 
 ## Basic usage
+`libraryDependencies += "com.github.ffmmjj" % "spark-test-assertions_2.11" % "0.1.0"`
+
+and then
+
 `import com.github.ffmmjj.spark.assertions.DataFrameAssertions._`
 
 and then, in your test,

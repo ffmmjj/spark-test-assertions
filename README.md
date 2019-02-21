@@ -2,7 +2,7 @@
 A single assertion to compare Spark DataFrames.
 
 ## Basic usage
-`libraryDependencies += "com.github.ffmmjj" % "spark-test-assertions_2.11" % "0.1.0"`
+`libraryDependencies += "com.github.ffmmjj" % "spark-test-assertions_2.11" % "0.2.0"`
 
 and then
 

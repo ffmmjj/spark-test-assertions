@@ -6,11 +6,15 @@ import org.apache.spark.sql.{DataFrame, Row}
 
 object DataFrameAssertions {
   implicit def dataFrameToDataFrameWithCustomAssertions(actual: DataFrame): DataFrameWithCustomAssertions = DataFrameWithCustomAssertions(actual)
+  implicit def dataFrameToExpectedDataFrameWithIgnoredColumns(expected: DataFrame): ExpectedDataFrameWithIgnoredColumns = ExpectedDataFrameWithIgnoredColumns(expected)
+}
+
+case class ExpectedDataFrameWithIgnoredColumns(expected: DataFrame) {
+  def withAnyColumnOrdering: ExpectedDataFrameWithIgnoredColumns = this
 }
 
 case class DataFrameWithCustomAssertions(actual: DataFrame) {
-
-  def shouldHaveSameContentsAs(expected: DataFrame, ignoringColumnsOrder: Boolean = false): Unit = {
+  def shouldHaveSameContentsAs(expected: DataFrame, withAnyColumnOrdering: Boolean): Unit = {
     val expectedDfColumns = expected.columns
     val actualDfColumns = actual.columns
     val missingColumnsInActualDf = expectedDfColumns.toSet.diff(actualDfColumns.toSet).toSeq
@@ -18,13 +22,21 @@ case class DataFrameWithCustomAssertions(actual: DataFrame) {
 
     assert(missingColumnsInActualDf.isEmpty, buildMissingColumnsMessage(missingColumnsInActualDf))
     assert(extraColumnInActualDf.isEmpty, buildExtraColumnsMessage(extraColumnInActualDf))
-    assert(ignoringColumnsOrder || (actualDfColumns sameElements expectedDfColumns), buildColumnsInDifferentOrderMessage(expected))
+    assert(withAnyColumnOrdering || (actualDfColumns sameElements expectedDfColumns), buildColumnsInDifferentOrderMessage(expected))
 
     val columnsWithDifferentTypes = getColumnsWithDifferentTypes(expected)
     assert(columnsWithDifferentTypes.isEmpty, buildColumnsWithDifferentTypesMessage(columnsWithDifferentTypes))
 
     val linesWithUnmatchedValues = getLinesWithUnmatchedValues(expected)
     assert(linesWithUnmatchedValues.isEmpty, buildUnmatchedValuesMessage(linesWithUnmatchedValues))
+  }
+
+  def shouldHaveSameContentsAs(expected: DataFrame): Unit = {
+    shouldHaveSameContentsAs(expected, withAnyColumnOrdering = false)
+  }
+
+  def shouldHaveSameContentsAs(expected: ExpectedDataFrameWithIgnoredColumns): Unit = {
+    shouldHaveSameContentsAs(expected.expected, withAnyColumnOrdering = true)
   }
 
   private def getColumnsWithDifferentTypes(expected: DataFrame) = {

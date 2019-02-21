@@ -61,6 +61,8 @@ Will output an exception with message
 assertion failed: DataFrame [field1: string, field2: string] has the same columns as [field2: string, field1: string], but in a different order - do you really care about column order in this test?
 ```
 
+_It's possible, however, to add the `withAnyColumnOrdering` qualifier to prevent column ordering from being checked like `actual shouldHaveSameContentsAs (expected withAnyColumnOrdering)` (parenthesis required) or as an explicit argument like `actual.shouldHaveSameContentsAs(expected, withAnyColumnOrdering=true)`_
+
 ```scala
 it should "raise an exception if the columns are the same but the values differ in some of the dataframe lines" in {
   val actual = Seq(

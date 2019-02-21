@@ -2,13 +2,9 @@ name := "spark-test-assertions"
 
 scalaVersion := "2.11.12"
 
-libraryDependencies += "org.apache.spark" %% "spark-core" % "2.1.2" % Provided
-libraryDependencies += "org.apache.spark" %% "spark-sql" % "2.1.2" % Provided
-
-libraryDependencies += "org.apache.spark" %% "spark-core" % "2.1.2" % Test
-libraryDependencies += "org.apache.spark" %% "spark-sql" % "2.1.2" % Test
-libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test
-
+libraryDependencies ++= dependencies.sparkDependencies.map(_ % Provided)
+libraryDependencies ++= dependencies.sparkDependencies.map(_ % Test)
+libraryDependencies ++= dependencies.testDependencies.map(_ % Test)
 
 // POM settings for Sonatype
 organization := "com.github.ffmmjj"

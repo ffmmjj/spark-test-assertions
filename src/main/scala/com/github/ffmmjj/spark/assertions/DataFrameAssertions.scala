@@ -15,6 +15,8 @@ case class ExpectedDataFrameWithIgnoredColumns(expected: DataFrame) {
 
 case class ColumnValueMismatch(columnName: String, actualValue: String, expectedValue: String)
 
+case class ValueMismatchesInLine(lineNumber: Int, columnsMismatches: Map[String, ColumnValueMismatch])
+
 case class DataFrameWithCustomAssertions(actual: DataFrame) {
   def shouldHaveSameContentsAs(expected: DataFrame, withAnyColumnOrdering: Boolean): Unit = {
     val expectedDfColumns = expected.columns
@@ -50,8 +52,8 @@ case class DataFrameWithCustomAssertions(actual: DataFrame) {
   private def getLinesWithUnmatchedValues(expected: DataFrame) = {
     actual.collect().zip(expected.collect())
       .zipWithIndex
-      .map { case (rows, lineNo) => (unmatchingValues(rows._1, rows._2), lineNo) }
-      .filter { case (mismatchesMap, _) => mismatchesMap.nonEmpty }
+      .map { case (rows, lineNo) => ValueMismatchesInLine(lineNo, unmatchingValues(rows._1, rows._2)) }
+      .filter (_.columnsMismatches.nonEmpty)
   }
 
   private def buildColumnsWithDifferentTypesMessage(columnsWithDifferentTypes: Seq[((String, DataType), (String, DataType))]) = {
@@ -66,11 +68,11 @@ case class DataFrameWithCustomAssertions(actual: DataFrame) {
       s"Actual: ${String.join(", ", actualTypesMessage:_*)}"
   }
 
-  private def buildUnmatchedValuesMessage(linesWithUnmatchedValues: Array[(Map[String, ColumnValueMismatch], Int)]) = {
+  private def buildUnmatchedValuesMessage(linesWithUnmatchedValues: Array[ValueMismatchesInLine]) = {
     val unmatchedValuesDescriptions = linesWithUnmatchedValues
-      .map {case (unmatchedValues, lineNo) =>
-        s"Line $lineNo: {${String.join(", ", unmatchedValues.map(item => s"${item._1}: (expected ${item._2.expectedValue}, found ${item._2.actualValue})").toSeq:_*)}}"
-      }
+      .map (lineMismatch =>
+        s"Line ${lineMismatch.lineNumber}: {${String.join(", ", lineMismatch.columnsMismatches.map(item => s"${item._1}: (expected ${item._2.expectedValue}, found ${item._2.actualValue})").toSeq:_*)}}"
+      )
 
     "Different values found.\n" + String.join("\n", unmatchedValuesDescriptions:_*)
   }

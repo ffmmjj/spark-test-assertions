@@ -2,8 +2,8 @@ package com.github.ffmmjj.spark.assertions
 
 import com.github.ffmmjj.spark.assertions.DataFrameAssertions._
 import com.github.ffmmjj.spark.helpers.SparkSessionTestWrapper
-import org.apache.spark.sql.AccessShowString
 import org.scalatest.{FlatSpec, Matchers}
+import org.apache.spark.sql.AccessShowString
 
 import scala.util.Try
 
@@ -81,12 +81,21 @@ class DataFrameAssertionsTest extends FlatSpec with SparkSessionTestWrapper with
       ("value1", "value7", "value8"),
       ("value9", "value5", "value6")
     ).toDF("field1", "field2", "field3")
+    val expectedMismatchesFromActualDfSummary = Seq(
+      (0, null, "value2", "value3"),
+      (1, "value4", null, null)
+    ).toDF("line", "field1", "field2", "field3")
+    val expectedMismatchesFromExpectedDfSummary = Seq(
+      (0, null, "value7", "value8"),
+      (1, "value9", null, null)
+    ).toDF("line", "field1", "field2", "field3")
 
-    val assertionResult = Try(actual shouldHaveSameContentsAs expected)
+    val failureMessage = Try(actual shouldHaveSameContentsAs expected).failed.get.getMessage
 
-    val failureMessage = assertionResult.failed.get.getMessage
-    failureMessage should include ("Different values found.")
-    failureMessage should include ("Line 0: {field2: (expected value7, found value2), field3: (expected value8, found value3)}")
-    failureMessage should include ("Line 1: {field1: (expected value9, found value4)}")
+    failureMessage should include ("Different values found in some lines.")
+    failureMessage should include ("Mismatched values in actual DataFrame:")
+    failureMessage should include (AccessShowString.showString(expectedMismatchesFromActualDfSummary, 2))
+    failureMessage should include ("Mismatched values in expected DataFrame:")
+    failureMessage should include (AccessShowString.showString(expectedMismatchesFromExpectedDfSummary, 2))
   }
 }

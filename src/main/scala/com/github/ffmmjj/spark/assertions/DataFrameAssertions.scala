@@ -1,7 +1,7 @@
 package com.github.ffmmjj.spark.assertions
 
 import org.apache.spark.sql.types._
-import org.apache.spark.sql.{DataFrame, Row}
+import org.apache.spark.sql.{AccessShowString, DataFrame, Row, SparkSession}
 
 
 object DataFrameAssertions {
@@ -14,10 +14,11 @@ case class ExpectedDataFrameWithIgnoredColumns(expected: DataFrame) {
 }
 
 case class ColumnValueMismatch(columnName: String, actualValue: String, expectedValue: String)
-
 case class ValueMismatchesInLine(lineNumber: Int, columnsMismatches: Map[String, ColumnValueMismatch])
 
 case class DataFrameWithCustomAssertions(actual: DataFrame) {
+  private val spark: SparkSession = actual.sqlContext.sparkSession
+
   def shouldHaveSameContentsAs(expected: DataFrame, withAnyColumnOrdering: Boolean): Unit = {
     val expectedDfColumns = expected.columns
     val actualDfColumns = actual.columns
@@ -69,12 +70,43 @@ case class DataFrameWithCustomAssertions(actual: DataFrame) {
   }
 
   private def buildUnmatchedValuesMessage(linesWithUnmatchedValues: Array[ValueMismatchesInLine]) = {
-    val unmatchedValuesDescriptions = linesWithUnmatchedValues
-      .map (lineMismatch =>
-        s"Line ${lineMismatch.lineNumber}: {${String.join(", ", lineMismatch.columnsMismatches.map(item => s"${item._1}: (expected ${item._2.expectedValue}, found ${item._2.actualValue})").toSeq:_*)}}"
-      )
+    val columnsWithUnmatchedValues = linesWithUnmatchedValues.flatMap(_.columnsMismatches.keys).sorted
+    val mismatchesInExpectedDf = lineMismatchesToValueRows(linesWithUnmatchedValues, columnsWithUnmatchedValues,
+      (columnMismatch: ColumnValueMismatch) => columnMismatch.expectedValue)
+    val mismatchesInActualDf = lineMismatchesToValueRows(linesWithUnmatchedValues, columnsWithUnmatchedValues,
+      (columnMismatch: ColumnValueMismatch) => columnMismatch.actualValue)
+    val mismatchesDfSchema = StructType(
+      Seq(StructField("line", IntegerType, nullable = false)) ++
+        columnsWithUnmatchedValues.map(colName => StructField(colName, StringType, nullable = true))
+    )
+    val expectedMismatchesDf = spark.createDataFrame(
+      spark.sparkContext.parallelize(mismatchesInExpectedDf),
+      mismatchesDfSchema
+    )
+    val actualMismatchesDf = spark.createDataFrame(
+      spark.sparkContext.parallelize(mismatchesInActualDf),
+      mismatchesDfSchema
+    )
 
-    "Different values found.\n" + String.join("\n", unmatchedValuesDescriptions:_*)
+    "Different values found in some lines.\n" +
+    "Mismatched values in actual DataFrame:\n" +
+    AccessShowString.showString(actualMismatchesDf, mismatchesInActualDf.size) +
+    "Mismatched values in expected DataFrame:\n" +
+    AccessShowString.showString(expectedMismatchesDf, mismatchesInExpectedDf.size)
+  }
+
+  private def lineMismatchesToValueRows(linesWithUnmatchedValues: Array[ValueMismatchesInLine],
+                                        columnsWithUnmatchedValues: Array[String],
+                                        getMismatchedValue: ColumnValueMismatch => String) = {
+    linesWithUnmatchedValues
+      .map(lineMismatch =>
+        Seq(lineMismatch.lineNumber) ++
+        columnsWithUnmatchedValues.map(
+          col => lineMismatch.columnsMismatches.get(col).map(getMismatchedValue).orNull
+        ).toSeq
+      )
+      .map(Row(_: _*))
+      .toSeq
   }
 
   private def unmatchingValues(actualRow: Row, expectedRow: Row) = {

@@ -13,6 +13,8 @@ case class ExpectedDataFrameWithIgnoredColumns(expected: DataFrame) {
   def withAnyColumnOrdering: ExpectedDataFrameWithIgnoredColumns = this
 }
 
+case class ColumnValueMismatch(columnName: String, actualValue: String, expectedValue: String)
+
 case class DataFrameWithCustomAssertions(actual: DataFrame) {
   def shouldHaveSameContentsAs(expected: DataFrame, withAnyColumnOrdering: Boolean): Unit = {
     val expectedDfColumns = expected.columns
@@ -52,7 +54,7 @@ case class DataFrameWithCustomAssertions(actual: DataFrame) {
       .filter { case (mismatchesMap, _) => mismatchesMap.nonEmpty }
   }
 
-  private def buildColumnsWithDifferentTypesMessage(columnsWithDifferentTypes: Seq[((String, DataType), (String, DataType))]): String = {
+  private def buildColumnsWithDifferentTypesMessage(columnsWithDifferentTypes: Seq[((String, DataType), (String, DataType))]) = {
     val unmatchedColumnsFromActualDf = columnsWithDifferentTypes.map(_._1)
     val unmatchedColumnsFromExpectedDf = columnsWithDifferentTypes.map(_._2)
 
@@ -64,16 +66,16 @@ case class DataFrameWithCustomAssertions(actual: DataFrame) {
       s"Actual: ${String.join(", ", actualTypesMessage:_*)}"
   }
 
-  private def buildUnmatchedValuesMessage(linesWithUnmatchedValues: Array[(Map[String, String], Int)]): String = {
+  private def buildUnmatchedValuesMessage(linesWithUnmatchedValues: Array[(Map[String, ColumnValueMismatch], Int)]) = {
     val unmatchedValuesDescriptions = linesWithUnmatchedValues
       .map {case (unmatchedValues, lineNo) =>
-        s"Line $lineNo: {${String.join(", ", unmatchedValues.map(item => s"${item._1}: ${item._2}").toSeq:_*)}}"
+        s"Line $lineNo: {${String.join(", ", unmatchedValues.map(item => s"${item._1}: (expected ${item._2.expectedValue}, found ${item._2.actualValue})").toSeq:_*)}}"
       }
 
     "Different values found.\n" + String.join("\n", unmatchedValuesDescriptions:_*)
   }
 
-  private def unmatchingValues(actualRow: Row, expectedRow: Row): Map[String, String] = {
+  private def unmatchingValues(actualRow: Row, expectedRow: Row) = {
     actual.schema
       .filter(schemaField => {
         schemaField.dataType match {
@@ -85,7 +87,7 @@ case class DataFrameWithCustomAssertions(actual: DataFrame) {
         }
       })
       .map(schemaField => {
-        (schemaField.name, s"(expected ${expectedRow.getAs[String](schemaField.name)}, found ${actualRow.getAs[String](schemaField.name)})")
+        schemaField.name -> ColumnValueMismatch(schemaField.name, actualRow.getAs[String](schemaField.name), expectedRow.getAs[String](schemaField.name))
       })
       .toMap
   }

@@ -2,6 +2,7 @@ package com.github.ffmmjj.spark.assertions
 
 import com.github.ffmmjj.spark.assertions.DataFrameAssertions._
 import com.github.ffmmjj.spark.helpers.SparkSessionTestWrapper
+import org.apache.spark.sql.AccessShowString
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.Try

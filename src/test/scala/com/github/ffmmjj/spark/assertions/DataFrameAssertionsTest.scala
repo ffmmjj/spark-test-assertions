@@ -74,21 +74,21 @@ class DataFrameAssertionsTest extends FlatSpec with SparkSessionTestWrapper with
 
   it should "raise an exception if the columns are the same but the values differ in some of the dataframe lines" in {
     val actual = Seq(
-      ("value1", "value2", "value3"),
-      ("value4", "value5", "value6")
-    ).toDF("field1", "field2", "field3")
+      ("value1", 2, 3.0f, 7.68910),
+      ("value4", 5, 6.0f, 11.121314)
+    ).toDF("field1", "field2", "field3", "field4")
     val expected = Seq(
-      ("value1", "value7", "value8"),
-      ("value9", "value5", "value6")
-    ).toDF("field1", "field2", "field3")
+      ("value1", 7, 8.0f, 7.68910),
+      ("value9", 5, 6.0f, 15.161718)
+    ).toDF("field1", "field2", "field3", "field4")
     val expectedMismatchesFromActualDfSummary = Seq(
-      (0, null, "value2", "value3"),
-      (1, "value4", null, null)
-    ).toDF("line", "field1", "field2", "field3")
+      (0, null.asInstanceOf[String], "2", "3.0", null.asInstanceOf[String]),
+      (1,  "value4", null.asInstanceOf[String], null.asInstanceOf[String], "11.121314")
+    ).toDF("line", "field1", "field2", "field3", "field4")
     val expectedMismatchesFromExpectedDfSummary = Seq(
-      (0, null, "value7", "value8"),
-      (1, "value9", null, null)
-    ).toDF("line", "field1", "field2", "field3")
+      (0, null.asInstanceOf[String], "7", "8.0", null.asInstanceOf[String]),
+      (1, "value9", null.asInstanceOf[String], null.asInstanceOf[String], "15.161718")
+    ).toDF("line", "field1", "field2", "field3", "field4")
 
     val failureMessage = Try(actual shouldHaveSameContentsAs expected).failed.get.getMessage
 

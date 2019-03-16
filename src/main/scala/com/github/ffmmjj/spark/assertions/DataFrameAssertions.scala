@@ -121,7 +121,10 @@ case class DataFrameWithCustomAssertions(actual: DataFrame) {
         }
       })
       .map(schemaField => {
-        schemaField.name -> ColumnValueMismatch(schemaField.name, actualRow.getAs[String](schemaField.name), expectedRow.getAs[String](schemaField.name))
+        val actualValueAsString = Option(actualRow.getAs[Any](schemaField.name)).map(_.toString).getOrElse("null")
+        val expectedValueAsString = Option(expectedRow.getAs[Any](schemaField.name)).map(_.toString).getOrElse("null")
+
+        schemaField.name -> ColumnValueMismatch(schemaField.name, actualValueAsString, expectedValueAsString)
       })
       .toMap
   }

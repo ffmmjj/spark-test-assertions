@@ -2,7 +2,7 @@
 A single assertion to compare Spark DataFrames.
 
 ## Basic usage
-`libraryDependencies += "com.github.ffmmjj" % "spark-test-assertions_2.11" % "0.2.0"`
+`libraryDependencies += "com.github.ffmmjj" % "spark-test-assertions_2.11" % "0.3.0"`
 
 and then
 
@@ -80,7 +80,19 @@ it should "raise an exception if the columns are the same but the values differ 
 
 Will output an exception with message 
 ```
-assertion failed: Different values found.
-Line 0: {field2: (expected value7, found value2), field3: (expected value8, found value3)}
-Line 1: {field1: (expected value9, found value4)}
+assertion failed: Different values found in some lines.
+Mismatched values in actual DataFrame:
++----+------+------+------+
+|line|field1|field2|field3|
++----+------+------+------+
+|   0|  null|value2|value3|
+|   1|value4|  null|  null|
++----+------+------+------+
+Mismatched values in expected DataFrame:
++----+------+------+------+
+|line|field1|field2|field3|
++----+------+------+------+
+|   0|  null|value7|value8|
+|   1|value9|  null|  null|
++----+------+------+------+
 ```

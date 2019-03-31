@@ -98,4 +98,20 @@ class DataFrameAssertionsTest extends FlatSpec with SparkSessionTestWrapper with
     failureMessage should include ("Mismatched values in expected DataFrame:")
     failureMessage should include (AccessShowString.showString(expectedMismatchesFromExpectedDfSummary, 2))
   }
+
+  it should "raise an exception if the number of rows in the actual dataframe is different than in the expected dataframe" in {
+    val actual = Seq(
+      ("value1", 7.68910)
+    ).toDF("field1", "field2")
+    val expected = Seq(
+      ("value1", 7.68910),
+      ("value2", 15.161718)
+    ).toDF("field1", "field2")
+
+    val failureMessage = Try(actual shouldHaveSameContentsAs expected).failed.get.getMessage
+
+    failureMessage should include ("The number of rows in the expected dataframe is different than in the expected dataframe:")
+    failureMessage should include ("Expected: 2")
+    failureMessage should include ("Actual: 1")
+  }
 }

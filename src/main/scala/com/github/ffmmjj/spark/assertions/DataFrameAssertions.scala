@@ -24,10 +24,13 @@ case class DataFrameWithCustomAssertions(actual: DataFrame) {
     val actualDfColumns = actual.columns
     val missingColumnsInActualDf = expectedDfColumns.toSet.diff(actualDfColumns.toSet).toSeq
     val extraColumnInActualDf = actualDfColumns.toSet.diff(expectedDfColumns.toSet).toSeq
+    val expectedDfRowCount = expected.count()
+    val actualDfRowCount = actual.count()
 
     assert(missingColumnsInActualDf.isEmpty, buildMissingColumnsMessage(missingColumnsInActualDf))
     assert(extraColumnInActualDf.isEmpty, buildExtraColumnsMessage(extraColumnInActualDf))
     assert(withAnyColumnOrdering || (actualDfColumns sameElements expectedDfColumns), buildColumnsInDifferentOrderMessage(expected))
+    assert(expectedDfRowCount == actualDfRowCount, buildDifferentNumberOfRowsMessage(expectedDfRowCount, actualDfRowCount))
 
     val columnsWithDifferentTypes = getColumnsWithDifferentTypes(expected)
     assert(columnsWithDifferentTypes.isEmpty, buildColumnsWithDifferentTypesMessage(columnsWithDifferentTypes))
@@ -55,6 +58,14 @@ case class DataFrameWithCustomAssertions(actual: DataFrame) {
       .zipWithIndex
       .map { case (rows, lineNo) => ValueMismatchesInLine(lineNo, unmatchingValues(rows._1, rows._2)) }
       .filter (_.columnsMismatches.nonEmpty)
+  }
+
+  private def buildDifferentNumberOfRowsMessage(expectedDfRowCount: Long, actualDfRowCount: Long) = {
+    s"""
+       |"The number of rows in the expected dataframe is different than in the expected dataframe:"
+       |Expected: $expectedDfRowCount
+       |Actual: $actualDfRowCount
+      """.stripMargin
   }
 
   private def buildColumnsWithDifferentTypesMessage(columnsWithDifferentTypes: Seq[((String, DataType), (String, DataType))]) = {

@@ -48,6 +48,26 @@ assertion failed: Dataframe [field1: string, field2: string ... 1 more field] co
 ```
 
 ```scala
+it should "raise an exception if the number of rows in the actual dataframe is different than in the expected dataframe" in {
+  val actual = Seq(
+    ("value1", 7.68910)
+  ).toDF("field1", "field2")
+  val expected = Seq(
+    ("value1", 7.68910),
+    ("value2", 15.161718)
+  ).toDF("field1", "field2")
+
+  actual shouldHaveSameContentsAs expected
+```
+
+Will output an exception with message
+```
+The number of rows in the actual dataframe is different than in the expected dataframe.
+Expected: 2
+Actual: 1
+```
+
+```scala
 it should "raise an exception if the columns in the actual and expected dataframes follow a different order" in {
   val actual = Seq(("value1", "value2")).toDF("field1", "field2")
   val expected = Seq(("value2", "value1")).toDF("field2", "field1")

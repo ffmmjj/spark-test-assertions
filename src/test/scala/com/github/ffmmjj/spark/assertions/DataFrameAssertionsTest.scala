@@ -110,7 +110,7 @@ class DataFrameAssertionsTest extends FlatSpec with SparkSessionTestWrapper with
 
     val failureMessage = Try(actual shouldHaveSameContentsAs expected).failed.get.getMessage
 
-    failureMessage should include ("The number of rows in the expected dataframe is different than in the expected dataframe:")
+    failureMessage should include ("The number of rows in the actual dataframe is different than in the expected dataframe.")
     failureMessage should include ("Expected: 2")
     failureMessage should include ("Actual: 1")
   }

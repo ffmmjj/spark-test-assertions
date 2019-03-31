@@ -62,7 +62,7 @@ case class DataFrameWithCustomAssertions(actual: DataFrame) {
 
   private def buildDifferentNumberOfRowsMessage(expectedDfRowCount: Long, actualDfRowCount: Long) = {
     s"""
-       |"The number of rows in the expected dataframe is different than in the expected dataframe:"
+       |"The number of rows in the actual dataframe is different than in the expected dataframe."
        |Expected: $expectedDfRowCount
        |Actual: $actualDfRowCount
       """.stripMargin

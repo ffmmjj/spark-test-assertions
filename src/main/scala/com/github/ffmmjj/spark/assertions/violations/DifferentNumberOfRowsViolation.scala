@@ -2,7 +2,7 @@ package com.github.ffmmjj.spark.assertions.violations
 
 import org.apache.spark.sql.DataFrame
 
-class DifferentNumberOfRows(expected: DataFrame, actual: DataFrame) extends EqualityViolations {
+class DifferentNumberOfRowsViolation(expected: DataFrame, actual: DataFrame) extends EqualityViolation {
   private val expectedDfRowCount = expected.count()
   private val actualDfRowCount = actual.count()
 

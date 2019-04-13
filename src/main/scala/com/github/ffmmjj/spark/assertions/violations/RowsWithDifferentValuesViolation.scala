@@ -4,7 +4,7 @@ import com.github.ffmmjj.spark.assertions.{ColumnValueMismatch, ValueMismatchesI
 import org.apache.spark.sql.types.{DoubleType, FloatType, IntegerType, LongType, StringType, StructField, StructType}
 import org.apache.spark.sql.{AccessShowString, DataFrame, Row, SparkSession}
 
-class RowsWithDifferentValues(spark: SparkSession, expected: DataFrame, actual: DataFrame) extends EqualityViolations {
+class RowsWithDifferentValuesViolation(spark: SparkSession, expected: DataFrame, actual: DataFrame) extends EqualityViolation {
   private val linesWithUnmatchedValues = getLinesWithUnmatchedValues
 
   override def notFound: Boolean = linesWithUnmatchedValues.isEmpty

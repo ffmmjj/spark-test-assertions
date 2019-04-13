@@ -2,7 +2,7 @@ package com.github.ffmmjj.spark.assertions.violations
 
 import org.apache.spark.sql.DataFrame
 
-class FewerColumns(expected: DataFrame, actual: DataFrame) extends EqualityViolations {
+class FewerColumnsViolation(expected: DataFrame, actual: DataFrame) extends EqualityViolation {
   private val expectedDfColumns = expected.columns
   private val actualDfColumns = actual.columns
   private val missingColumnsInActualDf = expectedDfColumns.toSet.diff(actualDfColumns.toSet).toSeq

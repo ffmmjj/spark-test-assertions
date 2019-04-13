@@ -2,7 +2,7 @@ package com.github.ffmmjj.spark.assertions.violations
 
 import org.apache.spark.sql.DataFrame
 
-class DifferentColumnOrdering(expected: DataFrame, actual: DataFrame) extends EqualityViolations {
+class DifferentColumnOrderingViolation(expected: DataFrame, actual: DataFrame) extends EqualityViolation {
   override def notFound: Boolean = actual.columns sameElements expected.columns
 
   override def toString: String =

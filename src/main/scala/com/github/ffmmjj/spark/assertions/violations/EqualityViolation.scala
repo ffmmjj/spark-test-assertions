@@ -1,6 +1,6 @@
 package com.github.ffmmjj.spark.assertions.violations
 
-trait EqualityViolations {
+trait EqualityViolation {
   def notFound: Boolean
   def toString: String
 }

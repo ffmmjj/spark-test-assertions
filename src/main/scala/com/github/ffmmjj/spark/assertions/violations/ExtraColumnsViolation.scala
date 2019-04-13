@@ -2,7 +2,7 @@ package com.github.ffmmjj.spark.assertions.violations
 
 import org.apache.spark.sql.DataFrame
 
-class ExtraColumns(expected: DataFrame, actual: DataFrame) extends EqualityViolations {
+class ExtraColumnsViolation(expected: DataFrame, actual: DataFrame) extends EqualityViolation {
   private val expectedDfColumns = expected.columns
   private val actualDfColumns = actual.columns
 

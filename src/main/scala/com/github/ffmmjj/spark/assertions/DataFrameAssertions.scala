@@ -20,22 +20,22 @@ case class DataFrameWithCustomAssertions(actual: DataFrame) {
   private val spark: SparkSession = actual.sqlContext.sparkSession
 
   def shouldHaveSameContentsAs(expected: DataFrame, withAnyColumnOrdering: Boolean): Unit = {
-    val fewerColumnsViolation = new FewerColumns(expected, actual)
+    val fewerColumnsViolation = new FewerColumnsViolation(expected, actual)
     assert(fewerColumnsViolation.notFound, fewerColumnsViolation.toString)
 
-    val extraColumnsViolation = new ExtraColumns(expected, actual)
+    val extraColumnsViolation = new ExtraColumnsViolation(expected, actual)
     assert(extraColumnsViolation.notFound, extraColumnsViolation.toString)
 
-    val differentColumnOrderingViolation = new DifferentColumnOrdering(expected, actual)
+    val differentColumnOrderingViolation = new DifferentColumnOrderingViolation(expected, actual)
     assert(withAnyColumnOrdering || differentColumnOrderingViolation.notFound, differentColumnOrderingViolation.toString)
 
-    val differentNumberOfRowsViolation = new DifferentNumberOfRows(expected, actual)
+    val differentNumberOfRowsViolation = new DifferentNumberOfRowsViolation(expected, actual)
     assert(differentNumberOfRowsViolation.notFound, differentNumberOfRowsViolation.toString)
 
-    val differentColumnTypesViolation = new DifferentColumnTypes(expected, actual)
+    val differentColumnTypesViolation = new DifferentColumnTypesViolation(expected, actual)
     assert(differentColumnTypesViolation.notFound, differentColumnTypesViolation.toString)
 
-    val rowsWithDifferentValuesViolation = new RowsWithDifferentValues(spark, expected, actual)
+    val rowsWithDifferentValuesViolation = new RowsWithDifferentValuesViolation(spark, expected, actual)
     assert(rowsWithDifferentValuesViolation.notFound, rowsWithDifferentValuesViolation.toString)
   }
 

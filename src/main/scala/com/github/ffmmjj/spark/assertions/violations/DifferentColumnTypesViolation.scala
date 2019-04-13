@@ -3,7 +3,7 @@ package com.github.ffmmjj.spark.assertions.violations
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.types.DataType
 
-class DifferentColumnTypes(expected: DataFrame, actual: DataFrame) extends EqualityViolations {
+class DifferentColumnTypesViolation(expected: DataFrame, actual: DataFrame) extends EqualityViolation {
   private val columnsWithDifferentTypes = getColumnsWithDifferentTypes
 
   override def notFound: Boolean = columnsWithDifferentTypes.isEmpty

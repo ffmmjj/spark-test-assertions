@@ -76,8 +76,8 @@ case class DataFrameWithCustomAssertions(actual: DataFrame) {
     val actualTypesMessage = unmatchedColumnsFromActualDf.map { case (columnName, columnType) => s"($columnName, ${columnType.getClass.getSimpleName})"}
 
     "Columns have different types.\n" +
-      s"Expected: ${String.join(", ", expectedTypesMessage:_*)}\n"+
-      s"Actual: ${String.join(", ", actualTypesMessage:_*)}"
+      s"Expected: ${expectedTypesMessage.mkString(", ")}\n"+
+      s"Actual: ${actualTypesMessage.mkString(", ")}"
   }
 
   private def buildUnmatchedValuesMessage(linesWithUnmatchedValues: Array[ValueMismatchesInLine]) = {
@@ -140,12 +140,12 @@ case class DataFrameWithCustomAssertions(actual: DataFrame) {
       .toMap
   }
 
-  private def buildMissingColumnsMessage(missingColumnsInActualDf: Seq[String]) = {
-    s"Dataframe ${actual.toString} doesn't have column(s) [${String.join(", ", missingColumnsInActualDf: _*)}]"
+  private def buildMissingColumnsMessage(missingColumnsInActualDf: Iterable[String]) = {
+    s"Dataframe ${actual.toString} doesn't have column(s) [${missingColumnsInActualDf.mkString(", ")}]"
   }
 
-  private def buildExtraColumnsMessage(extraColumnInActualDf: Seq[String]) = {
-    s"Dataframe ${actual.toString} contains extra columns [${String.join(", ", extraColumnInActualDf: _*)}]"
+  private def buildExtraColumnsMessage(extraColumnInActualDf: Iterable[String]) = {
+    s"Dataframe ${actual.toString} contains extra columns [${extraColumnInActualDf.mkString(", ")}]"
   }
 
   private def buildColumnsInDifferentOrderMessage(expected: DataFrame) = {

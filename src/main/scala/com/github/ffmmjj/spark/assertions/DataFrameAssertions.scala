@@ -23,13 +23,15 @@ case class DataFrameWithCustomAssertions(actual: DataFrame) {
     val expectedDfColumns = expected.columns
     val actualDfColumns = actual.columns
     val missingColumnsInActualDf = expectedDfColumns.toSet.diff(actualDfColumns.toSet).toSeq
+    assert(missingColumnsInActualDf.isEmpty, buildMissingColumnsMessage(missingColumnsInActualDf))
+
     val extraColumnInActualDf = actualDfColumns.toSet.diff(expectedDfColumns.toSet).toSeq
+    assert(extraColumnInActualDf.isEmpty, buildExtraColumnsMessage(extraColumnInActualDf))
+
+    assert(withAnyColumnOrdering || (actualDfColumns sameElements expectedDfColumns), buildColumnsInDifferentOrderMessage(expected))
+
     val expectedDfRowCount = expected.count()
     val actualDfRowCount = actual.count()
-
-    assert(missingColumnsInActualDf.isEmpty, buildMissingColumnsMessage(missingColumnsInActualDf))
-    assert(extraColumnInActualDf.isEmpty, buildExtraColumnsMessage(extraColumnInActualDf))
-    assert(withAnyColumnOrdering || (actualDfColumns sameElements expectedDfColumns), buildColumnsInDifferentOrderMessage(expected))
     assert(expectedDfRowCount == actualDfRowCount, buildDifferentNumberOfRowsMessage(expectedDfRowCount, actualDfRowCount))
 
     val columnsWithDifferentTypes = getColumnsWithDifferentTypes(expected)

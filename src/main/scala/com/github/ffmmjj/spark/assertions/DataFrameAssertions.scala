@@ -1,20 +1,13 @@
 package com.github.ffmmjj.spark.assertions
 
-import com.github.ffmmjj.spark.assertions.violations._
 import org.apache.spark.sql.{DataFrame, SparkSession}
+import com.github.ffmmjj.spark.assertions.violations._
 
 
 object DataFrameAssertions {
   implicit def dataFrameToDataFrameWithCustomAssertions(actual: DataFrame): DataFrameWithCustomAssertions = DataFrameWithCustomAssertions(actual)
   implicit def dataFrameToExpectedDataFrameWithIgnoredColumns(expected: DataFrame): ExpectedDataFrameWithIgnoredColumns = ExpectedDataFrameWithIgnoredColumns(expected)
 }
-
-case class ExpectedDataFrameWithIgnoredColumns(expected: DataFrame) {
-  def withAnyColumnOrdering: ExpectedDataFrameWithIgnoredColumns = this
-}
-
-case class ColumnValueMismatch(columnName: String, actualValue: String, expectedValue: String)
-case class ValueMismatchesInLine(lineNumber: Int, columnsMismatches: Map[String, ColumnValueMismatch])
 
 case class DataFrameWithCustomAssertions(actual: DataFrame) {
   private val spark: SparkSession = actual.sqlContext.sparkSession
@@ -37,4 +30,8 @@ case class DataFrameWithCustomAssertions(actual: DataFrame) {
   def shouldHaveSameContentsAs(expected: ExpectedDataFrameWithIgnoredColumns): Unit = {
     shouldHaveSameContentsAs(expected.expected, withAnyColumnOrdering = true)
   }
+}
+
+case class ExpectedDataFrameWithIgnoredColumns(expected: DataFrame) {
+  def withAnyColumnOrdering: ExpectedDataFrameWithIgnoredColumns = this
 }

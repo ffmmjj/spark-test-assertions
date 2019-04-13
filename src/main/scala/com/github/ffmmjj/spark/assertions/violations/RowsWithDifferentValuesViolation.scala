@@ -1,8 +1,10 @@
 package com.github.ffmmjj.spark.assertions.violations
 
-import com.github.ffmmjj.spark.assertions.{ColumnValueMismatch, ValueMismatchesInLine}
 import org.apache.spark.sql.types.{DoubleType, FloatType, IntegerType, LongType, StringType, StructField, StructType}
 import org.apache.spark.sql.{AccessShowString, DataFrame, Row, SparkSession}
+
+case class ColumnValueMismatch(columnName: String, actualValue: String, expectedValue: String)
+case class ValueMismatchesInLine(lineNumber: Int, columnsMismatches: Map[String, ColumnValueMismatch])
 
 class RowsWithDifferentValuesViolation(spark: SparkSession, expected: DataFrame, actual: DataFrame) extends EqualityViolation {
   private lazy val linesWithUnmatchedValues = getLinesWithUnmatchedValues

@@ -5,7 +5,7 @@ import org.apache.spark.sql.types.{DoubleType, FloatType, IntegerType, LongType,
 import org.apache.spark.sql.{AccessShowString, DataFrame, Row, SparkSession}
 
 class RowsWithDifferentValuesViolation(spark: SparkSession, expected: DataFrame, actual: DataFrame) extends EqualityViolation {
-  private val linesWithUnmatchedValues = getLinesWithUnmatchedValues
+  private lazy val linesWithUnmatchedValues = getLinesWithUnmatchedValues
 
   override def notFound: Boolean = linesWithUnmatchedValues.isEmpty
 

@@ -4,7 +4,7 @@ import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.types.DataType
 
 class DifferentColumnTypesViolation(expected: DataFrame, actual: DataFrame) extends EqualityViolation {
-  private val columnsWithDifferentTypes = getColumnsWithDifferentTypes
+  private lazy val columnsWithDifferentTypes = getColumnsWithDifferentTypes
 
   override def notFound: Boolean = columnsWithDifferentTypes.isEmpty
 

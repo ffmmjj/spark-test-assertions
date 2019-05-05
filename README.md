@@ -1,5 +1,5 @@
 # spark-test-assertions
-A single assertion to compare Spark DataFrames.
+A single assertion to compare Spark DataFrames and Datasets (future work).
 
 ## Basic usage
 `libraryDependencies += "com.github.ffmmjj" % "spark-test-assertions_2.11" % "<version>"`
